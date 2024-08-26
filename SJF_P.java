@@ -12,21 +12,19 @@ public class SJF_P extends Scheduler {
     public void getNext(boolean cpuEmpty) {
         if (!processes.isEmpty()) {
             Process shortestJob = processes.stream()
-                    .min(Comparator.comparingInt(p -> p.getRemainingTimeInCurrentBurst()))
+                    .min(Comparator.comparingInt(Process::getRemainingTimeInCurrentBurst))
                     .orElse(null);
-            if (shortestJob != null) {
-                if (cpuEmpty) {
+            if (cpuEmpty) {
+
+                processes.remove(shortestJob);
+                os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob);
+            } else {
+                Process currentProcess = os.getProcessInCPU();
+                if (currentProcess != null && shortestJob.getRemainingTimeInCurrentBurst() < currentProcess.getRemainingTimeInCurrentBurst()) {
 
                     processes.remove(shortestJob);
+                    os.interrupt(InterruptType.SCHEDULER_CPU_TO_RQ, currentProcess);
                     os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob);
-                } else {
-                    Process currentProcess = os.getProcessInCPU();
-                    if (currentProcess != null && shortestJob.getRemainingTimeInCurrentBurst() < currentProcess.getRemainingTimeInCurrentBurst()) {
-
-                        processes.remove(shortestJob);
-                        os.interrupt(InterruptType.SCHEDULER_CPU_TO_RQ, currentProcess); // Preempt the current process
-                        os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob); // Schedule the new shortest job
-                    }
                 }
             }
         }
@@ -37,11 +35,10 @@ public class SJF_P extends Scheduler {
 
         if (!processes.isEmpty()) {
             Process shortestJob = processes.stream()
-                    .min(Comparator.comparingInt(p -> p.getRemainingTimeInCurrentBurst()))
+                    .min(Comparator.comparingInt(Process::getRemainingTimeInCurrentBurst))
                     .orElse(null);
             Process currentProcess = os.getProcessInCPU();
-            if (shortestJob != null && currentProcess != null &&
-                    shortestJob.getRemainingTimeInCurrentBurst() < currentProcess.getRemainingTimeInCurrentBurst()) {
+            if (currentProcess != null && shortestJob.getRemainingTimeInCurrentBurst() < currentProcess.getRemainingTimeInCurrentBurst()) {
 
                 os.interrupt(InterruptType.SCHEDULER_CPU_TO_RQ, currentProcess);
                 os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob);
@@ -54,11 +51,10 @@ public class SJF_P extends Scheduler {
 
         if (!processes.isEmpty()) {
             Process shortestJob = processes.stream()
-                    .min(Comparator.comparingInt(p -> p.getRemainingTimeInCurrentBurst()))
+                    .min(Comparator.comparingInt(Process::getRemainingTimeInCurrentBurst))
                     .orElse(null);
             Process currentProcess = os.getProcessInCPU();
-            if (shortestJob != null && currentProcess != null &&
-                    shortestJob.getRemainingTimeInCurrentBurst() < currentProcess.getRemainingTimeInCurrentBurst()) {
+            if (currentProcess != null && shortestJob.getRemainingTimeInCurrentBurst() < currentProcess.getRemainingTimeInCurrentBurst()) {
                 os.interrupt(InterruptType.SCHEDULER_CPU_TO_RQ, currentProcess);
                 os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob);
             }

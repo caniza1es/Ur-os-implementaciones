@@ -13,14 +13,11 @@ public class SJF_NP extends Scheduler {
         if (cpuEmpty && !processes.isEmpty()) {
 
             Process shortestJob = processes.stream()
-                    .min(Comparator.comparingInt(p -> p.getRemainingTimeInCurrentBurst()))
+                    .min(Comparator.comparingInt(Process::getRemainingTimeInCurrentBurst))
                     .orElse(null);
-            if (shortestJob != null) {
+            processes.remove(shortestJob);
 
-                processes.remove(shortestJob);
-
-                os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob);
-            }
+            os.interrupt(InterruptType.SCHEDULER_RQ_TO_CPU, shortestJob);
         }
     }
 
