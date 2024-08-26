@@ -1,0 +1,67 @@
+    public double calcCPUUtilization(){
+        int totalCycles = clock;
+        int busyCycles = 0;
+        for (int i = 0; i < execution.size(); i++) {
+            if (execution.get(i) != -1) {
+                busyCycles++;
+            }
+        }
+        if (totalCycles == 0) {
+            return 0.0;
+        }
+        return (double) busyCycles / totalCycles;
+    }
+
+    
+    public double calcTurnaroundTime() {
+        double totalTurnaroundTime = 0;
+        for (Process process : processes) {
+            if (process.isFinished()) {
+                int turnaroundTime = process.getTime_finished() - process.getTime_init();
+                totalTurnaroundTime += turnaroundTime;
+            } else {
+                System.out.println("Warning: Process " + process.getPid() + " has not finished.");
+            }
+        }
+        if (processes.size() == 0) {
+            return 0;
+        }
+        return totalTurnaroundTime / processes.size();
+    }
+    
+    public double calcThroughput() {
+        int completedProcesses = 0;
+        for (Process process : processes) {
+            if (process.getTime_finished() != -1) {
+                completedProcesses++;
+            }
+        }
+        if (clock == 0) {
+            return 0;
+        }
+        return (double) completedProcesses / clock;
+    }
+    
+    public double calcAvgWaitingTime() {
+        double tot = 0;
+        for (Process p : processes) {
+            if (p.getTime_finished() != -1) {
+                int waitingTime = p.getTime_finished() - p.getTime_init() - p.getTotalExecutionTime();
+                tot += waitingTime;
+            }
+        }
+    return tot / processes.size();
+}
+    
+    public double calcAvgContextSwitches() {
+        return (clock == 0) ? 0.0 : (double) contextSwitches / processes.size();
+    }
+
+    public void incrementContextSwitches() {
+        contextSwitches++;
+    }
+
+    public void notifyContextSwitch() {
+        incrementContextSwitches();
+    }
+}
